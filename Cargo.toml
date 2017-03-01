@@ -1,0 +1,7 @@
+[package]
+name = "sokoban"
+version = "0.1.0"
+authors = ["张宇 <zhangyu19@le.com>"]
+
+[dependencies]
+"ncurses" = "5.85.0"
