@@ -146,7 +146,7 @@ impl Level {
     }
 
     fn reset(&mut self) {
-        clear_scr();
+        clear();
         self.map.clear();
         let (h, w, mut m, p) = Level::build_map(&self.layout);
         self.player = p;
@@ -177,7 +177,7 @@ impl Level {
             }
             l += 1;
         }
-        wmove(stdscr(), 0, 0);
+        // wmove(stdscr(), 0, 0);
         refresh();
     }
 
@@ -285,29 +285,26 @@ impl Level {
     }
 }
 
-fn init() {
-    initscr();
+fn game_mode() {
     raw();
+    curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
     keypad(stdscr(), true);
     noecho();
 }
 
-fn clear_scr() {
-    let mut h = 0;
-    while h < LINES() {
-        let mut w = 0;
-        while w < COLS() {
-            mvprintw(h, w, " ");
-            w += 1;
-        }
-        h += 1;
-    }
-    refresh();
+fn ctl_mode() {
+    cbreak();
+    wmove(stdscr(), LINES(), 0);
+    mvprintw(LINES() - 1, 0, ":");
+    curs_set(CURSOR_VISIBILITY::CURSOR_VISIBLE);
+    echo();
 }
 
 
+
 fn main() {
-    init();
+    initscr();
+    game_mode();
     let layout = Box::new(["          ".to_string(),
                            "   ###    ".to_string(),
                            "   #x#    ".to_string(),
@@ -320,11 +317,11 @@ fn main() {
                            "          ".to_string()]);
     let mut l = Level::new(1, layout);
     l.reset();
-    while !l.is_pass() {
-        let mut ch = getch();
-        if ch == KEY_F(1) {
+    loop {
+        if l.is_pass() {
             break;
         }
+        let mut ch = getch();
         match ch {
             KEY_LEFT => {
                 l.lmove();
@@ -337,6 +334,23 @@ fn main() {
             }
             KEY_DOWN => {
                 l.bmove();
+            }
+            0x3a => {
+                ctl_mode();
+                let mut input = "".to_string();
+                getstr(&mut input);
+                match &*input {
+                    "q" => break,
+                    "n" => {}
+                    "r" => l.reset(),
+                    _ => {}
+                }
+                let mut c = 0;
+                while c < COLS() {
+                    mvprintw(LINES() - 1, c, " ");
+                    c += 1;
+                }
+                game_mode();
             }
             _ => {}
         }
