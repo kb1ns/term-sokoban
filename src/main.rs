@@ -138,10 +138,10 @@ impl Level {
                     Cell::BOX(i, j) => return false,
                     _ => {}
                 }
+                c += 1;
             }
-            c += 1;
+            l += 1;
         }
-        l += 1;
         true
     }
 
@@ -320,8 +320,11 @@ fn main() {
                            "          ".to_string()]);
     let mut l = Level::new(1, layout);
     l.reset();
-    let mut ch = getch();
-    while ch != KEY_F(1) {
+    while !l.is_pass() {
+        let mut ch = getch();
+        if ch == KEY_F(1) {
+            break;
+        }
         match ch {
             KEY_LEFT => {
                 l.lmove();
@@ -337,7 +340,6 @@ fn main() {
             }
             _ => {}
         }
-        ch = getch();
     }
     endwin();
 }
