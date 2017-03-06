@@ -25,32 +25,40 @@ fn ctl_mode() {
 fn paint(level: &Level) {
     let starty = (LINES() - level.height as i32) / 2;
     let startx = (COLS() - level.width as i32) / 2;
-    let mut l = 0;
-    while l < level.map.len() {
-        let mut c = 0;
-        while c < level.map[l as usize].len() {
-            let m: String = match *&level.map[l as usize][c as usize] {
-                Cell::PLAYER(l, c) => 'i'.to_string(),
-                Cell::WALL(l, c) => '#'.to_string(),
-                Cell::BOX(l, c) => 'o'.to_string(),
-                Cell::TARGET(l, c) => 'x'.to_string(),
-                Cell::EMPTY(l, c) => ' '.to_string(),
-                Cell::PLAYER_ON_TARGET(l, c) => 'I'.to_string(),
-                Cell::BOX_ON_TARGET(l, c) => 'O'.to_string(),
+    for l in level.map.as_slice() {
+        for c in l {
+            match *c {
+                Cell::PLAYER(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "i");
+                }
+                Cell::WALL(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "#");
+                }
+                Cell::BOX(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "o");
+                }
+                Cell::TARGET(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "x");
+                }
+                Cell::EMPTY(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, " ");
+                }
+                Cell::PLAYER_ON_TARGET(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "I");
+                }
+                Cell::BOX_ON_TARGET(i, j) => {
+                    mvprintw(starty + i as i32, startx + j as i32, "O");
+                }
             };
-            c += 1;
-            mvprintw(starty + l as i32, startx + c as i32, &m);
         }
-        l += 1;
     }
-    // wmove(stdscr(), 0, 0);
     refresh();
 }
 
 fn main() {
     initscr();
     game_mode();
-    let mut level = Level::new(1, Box::new(map::l2));
+    let mut level = Level::new(1, Box::new(map::L2));
     level.reset();
     paint(&level);
     loop {
@@ -60,24 +68,32 @@ fn main() {
         let mut ch = getch();
         match ch {
             KEY_LEFT => {
-                level.lmove();
+                level.move_left();
                 paint(&level);
             }
             KEY_RIGHT => {
-                level.rmove();
+                level.move_right();
                 paint(&level);
             }
             KEY_UP => {
-                level.umove();
+                level.move_upward();
                 paint(&level);
             }
             KEY_DOWN => {
-                level.bmove();
+                level.move_down();
                 paint(&level);
             }
+            KEY_F1 => {
+                level.revert();
+                paint(&level);
+            }
+            // KEY_F9 => {
+            //     level.automove();
+            //     paint(&level);
+            // }
             0x3a => {
                 ctl_mode();
-                let mut input = "".to_string();
+                let mut input = String::new();
                 getstr(&mut input);
                 match &*input {
                     "q" => break,

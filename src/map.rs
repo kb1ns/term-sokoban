@@ -1,4 +1,4 @@
-pub const l1: [&'static str; 10] = ["          ",
+pub const L1: [&'static str; 10] = ["          ",
                                     "   ###    ",
                                     "   #x#    ",
                                     "   #o#### ",
@@ -9,7 +9,7 @@ pub const l1: [&'static str; 10] = ["          ",
                                     "   ###    ",
                                     "          "];
 
-pub const l2: [&'static str; 10] = ["         ",
+pub const L2: [&'static str; 10] = ["         ",
                                     "  ####   ",
                                     "  # i#   ",
                                     "  #o ### ",

@@ -6,3 +6,4 @@ Learning Rust with Sokoban
 - :q -- quit
 - :r -- reset
 - :n -- next level
+- F1 -- revert
