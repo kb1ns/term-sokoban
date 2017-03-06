@@ -23,8 +23,8 @@ fn ctl_mode() {
 }
 
 fn paint(level: &Level) {
-    let starty = (LINES() - level.height as i32) / 2;
-    let startx = (COLS() - level.width as i32) / 2;
+    let starty = (LINES() - level.height() as i32) / 2;
+    let startx = (COLS() - level.width() as i32) / 2;
     for l in level.map.as_slice() {
         for c in l {
             match *c {

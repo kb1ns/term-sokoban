@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+// use ncurses::*;
+
 pub enum Cell {
     PLAYER(usize, usize),
     WALL(usize, usize),
@@ -11,12 +13,12 @@ pub enum Cell {
 }
 
 pub struct Level {
-    pub index: i32,
-    pub height: usize,
-    pub width: usize,
-    pub layout: Box<[&'static str]>,
+    index: i32,
+    height: usize,
+    width: usize,
+    layout: Box<[&'static str]>,
     pub map: Vec<Vec<Cell>>,
-    pub player: (usize, usize),
+    player: (usize, usize),
     record: Vec<(usize, usize, Cell, usize, usize, Cell, usize, usize, Cell)>,
 }
 
@@ -199,6 +201,13 @@ impl Level {
         self.height = h;
     }
 
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
 
     fn build_map(cellstr: &Box<[&str]>) -> (usize, usize, Vec<Vec<Cell>>, (usize, usize)) {
         let mut m: Vec<Vec<Cell>> = Vec::new();
@@ -389,38 +398,39 @@ impl Level {
         }
         s
     }
-    fn paint(&self) {
-        let starty = (LINES() - self.height as i32) / 2;
-        let startx = (COLS() - self.width as i32) / 2;
-        for l in self.map.as_slice() {
-            for c in l {
-                match *c {
-                    Cell::PLAYER(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "i");
-                    }
-                    Cell::WALL(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "#");
-                    }
-                    Cell::BOX(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "o");
-                    }
-                    Cell::TARGET(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "x");
-                    }
-                    Cell::EMPTY(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, " ");
-                    }
-                    Cell::PLAYER_ON_TARGET(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "I");
-                    }
-                    Cell::BOX_ON_TARGET(i, j) => {
-                        mvprintw(starty + i as i32, startx + j as i32, "O");
-                    }
-                };
-            }
-        }
-        refresh();
-    }
+
+    // fn paint(&self) {
+    //     let starty = (LINES() - self.height as i32) / 2;
+    //     let startx = (COLS() - self.width as i32) / 2;
+    //     for l in self.map.as_slice() {
+    //         for c in l {
+    //             match *c {
+    //                 Cell::PLAYER(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "i");
+    //                 }
+    //                 Cell::WALL(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "#");
+    //                 }
+    //                 Cell::BOX(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "o");
+    //                 }
+    //                 Cell::TARGET(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "x");
+    //                 }
+    //                 Cell::EMPTY(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, " ");
+    //                 }
+    //                 Cell::PLAYER_ON_TARGET(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "I");
+    //                 }
+    //                 Cell::BOX_ON_TARGET(i, j) => {
+    //                     mvprintw(starty + i as i32, startx + j as i32, "O");
+    //                 }
+    //             };
+    //         }
+    //     }
+    //     refresh();
+    // }
 
     //TODO
     fn dfs(&mut self, stats: &mut HashMap<String, (usize, usize)>) {
