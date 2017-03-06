@@ -87,10 +87,6 @@ fn main() {
                 level.revert();
                 paint(&level);
             }
-            // KEY_F9 => {
-            //     level.automove();
-            //     paint(&level);
-            // }
             0x3a => {
                 ctl_mode();
                 let mut input = String::new();

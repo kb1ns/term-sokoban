@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-// use ncurses::*;
 
 pub enum Cell {
     PLAYER(usize, usize),
@@ -162,23 +161,6 @@ impl Level {
         }
     }
 
-    fn is_dead(&self) -> bool {
-        for l in self.map.as_slice() {
-            for c in l {
-                match c {
-                    &Cell::BOX(bl, bc) => {
-                        return self.map[bl - 1][bc].volume() + self.map[bl][bc - 1].volume() == 2 ||
-                               self.map[bl - 1][bc].volume() + self.map[bl][bc + 1].volume() == 2 ||
-                               self.map[bl + 1][bc].volume() + self.map[bl][bc - 1].volume() == 2 ||
-                               self.map[bl + 1][bc].volume() + self.map[bl][bc + 1].volume() == 2;
-                    }
-                    _ => {}
-                }
-            }
-        }
-        false
-    }
-
     pub fn is_pass(&self) -> bool {
         for l in self.map.as_slice() {
             for c in l {
@@ -331,139 +313,4 @@ impl Level {
         }
     }
 
-    fn can_move_upward(&mut self, stats: &mut HashMap<String, (usize, usize)>) -> bool {
-        let mut b = self.move_upward();
-        if b {
-            if stats.contains_key(&self.sig()) {
-                b = false;
-            }
-            self.revert();
-        }
-        b
-    }
-
-    fn can_move_down(&mut self, stats: &mut HashMap<String, (usize, usize)>) -> bool {
-        let mut b = self.move_down();
-        if b {
-            if stats.contains_key(&self.sig()) {
-                b = false;
-            }
-            self.revert();
-        }
-        b
-    }
-
-    fn can_move_right(&mut self, stats: &mut HashMap<String, (usize, usize)>) -> bool {
-        let mut b = self.move_right();
-        if b {
-            if stats.contains_key(&self.sig()) {
-                b = false;
-            }
-            self.revert();
-        }
-        b
-    }
-
-    fn can_move_left(&mut self, stats: &mut HashMap<String, (usize, usize)>) -> bool {
-        let mut b = self.move_left();
-        if b {
-            if stats.contains_key(&self.sig()) {
-                b = false;
-            }
-            self.revert();
-        }
-        b
-    }
-
-    //TODO
-    fn automove(&mut self) {
-        let mut stats: HashMap<String, (usize, usize)> = HashMap::new();
-        self.dfs(&mut stats);
-    }
-
-    fn sig(&self) -> String {
-        let mut s = String::new();
-        for l in self.map.as_slice() {
-            for c in l {
-                s.push(match c {
-                    &Cell::BOX(_, _) => 'o',
-                    &Cell::BOX_ON_TARGET(_, _) => 'O',
-                    &Cell::WALL(_, _) => '#',
-                    &Cell::PLAYER(_, _) => 'i',
-                    &Cell::PLAYER_ON_TARGET(_, _) => 'I',
-                    &Cell::EMPTY(_, _) => ' ',
-                    &Cell::TARGET(_, _) => 'x',
-                });
-            }
-        }
-        s
-    }
-
-    // fn paint(&self) {
-    //     let starty = (LINES() - self.height as i32) / 2;
-    //     let startx = (COLS() - self.width as i32) / 2;
-    //     for l in self.map.as_slice() {
-    //         for c in l {
-    //             match *c {
-    //                 Cell::PLAYER(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "i");
-    //                 }
-    //                 Cell::WALL(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "#");
-    //                 }
-    //                 Cell::BOX(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "o");
-    //                 }
-    //                 Cell::TARGET(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "x");
-    //                 }
-    //                 Cell::EMPTY(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, " ");
-    //                 }
-    //                 Cell::PLAYER_ON_TARGET(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "I");
-    //                 }
-    //                 Cell::BOX_ON_TARGET(i, j) => {
-    //                     mvprintw(starty + i as i32, startx + j as i32, "O");
-    //                 }
-    //             };
-    //         }
-    //     }
-    //     refresh();
-    // }
-
-    //TODO
-    fn dfs(&mut self, stats: &mut HashMap<String, (usize, usize)>) {
-        if self.is_pass() {
-            return;
-        }
-        if self.is_dead() {
-            self.revert();
-        }
-        // stats.push(self.sig(), self.player);
-        if self.can_move_upward(stats) {
-            self.move_upward();
-            let dump = self.sig();
-            stats.insert(dump, self.player);
-            self.dfs(stats);
-        } else if self.can_move_down(stats) {
-            self.move_down();
-            let dump = self.sig();
-            stats.insert(dump, self.player);
-            self.dfs(stats);
-        } else if self.can_move_left(stats) {
-            self.move_left();
-            let dump = self.sig();
-            stats.insert(dump, self.player);
-            self.dfs(stats);
-        } else if self.can_move_right(stats) {
-            self.move_right();
-            let dump = self.sig();
-            stats.insert(dump, self.player);
-            self.dfs(stats);
-        } else {
-            self.revert();
-            self.dfs(stats);
-        }
-    }
 }
