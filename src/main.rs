@@ -55,17 +55,31 @@ fn paint(level: &Level) {
     refresh();
 }
 
+fn next(i: usize) -> Level {
+    let level_count = map::Maps.len();
+    let mut index = i;
+    if i >= level_count {
+        index = 0;
+    }
+    Level::new(index + 1, Box::new(map::Maps[index]))
+}
+
+
 fn main() {
     initscr();
     game_mode();
-    let mut level = Level::new(1, Box::new(map::L2));
+    let mut index: usize = 0;
+    let mut level = next(index);
     level.reset();
     paint(&level);
     loop {
         if level.is_pass() {
-            break;
+            index += 1;
+            level = next(index);
+            level.reset();
+            paint(&level);
         }
-        let mut ch = getch();
+        let ch = getch();
         match ch {
             KEY_LEFT => {
                 level.move_left();
@@ -93,7 +107,12 @@ fn main() {
                 getstr(&mut input);
                 match &*input {
                     "q" => break,
-                    "n" => {}
+                    "n" => {
+                        index += 1;
+                        level = next(index);
+                        level.reset();
+                        paint(&level);
+                    }
                     "r" => {
                         clear();
                         level.reset();

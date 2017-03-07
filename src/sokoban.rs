@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-
+#[derive(Clone, Eq, PartialEq)]
 pub enum Cell {
     PLAYER(usize, usize),
     WALL(usize, usize),
@@ -12,7 +12,7 @@ pub enum Cell {
 }
 
 pub struct Level {
-    index: i32,
+    index: usize,
     height: usize,
     width: usize,
     layout: Box<[&'static str]>,
@@ -21,19 +21,6 @@ pub struct Level {
     record: Vec<(usize, usize, Cell, usize, usize, Cell, usize, usize, Cell)>,
 }
 
-impl Clone for Cell {
-    fn clone(&self) -> Self {
-        match *self {
-            Cell::PLAYER(i, j) => Cell::PLAYER(i, j),
-            Cell::PLAYER_ON_TARGET(i, j) => Cell::PLAYER_ON_TARGET(i, j),
-            Cell::WALL(i, j) => Cell::WALL(i, j),
-            Cell::BOX(i, j) => Cell::BOX(i, j),
-            Cell::BOX_ON_TARGET(i, j) => Cell::BOX_ON_TARGET(i, j),
-            Cell::TARGET(i, j) => Cell::TARGET(i, j),
-            Cell::EMPTY(i, j) => Cell::EMPTY(i, j),
-        }
-    }
-}
 
 impl Cell {
     fn volume(&self) -> u32 {
@@ -148,7 +135,7 @@ impl Cell {
 
 
 impl Level {
-    pub fn new(i: i32, cellstr: Box<[&'static str]>) -> Self {
+    pub fn new(i: usize, cellstr: Box<[&'static str]>) -> Self {
         let (line, col, mm, pp) = Level::build_map(&cellstr);
         Level {
             index: i,
@@ -312,5 +299,4 @@ impl Level {
             None => {}
         }
     }
-
 }
