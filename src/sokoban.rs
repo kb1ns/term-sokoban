@@ -12,7 +12,7 @@ pub enum Cell {
 }
 
 pub struct Level {
-    index: usize,
+    pub index: usize,
     height: usize,
     width: usize,
     layout: Box<[&'static str]>,

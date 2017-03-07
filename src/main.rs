@@ -32,13 +32,17 @@ fn paint(level: &Level) {
                     mvprintw(starty + i as i32, startx + j as i32, "i");
                 }
                 Cell::WALL(i, j) => {
+                    attron(A_DIM());
                     mvprintw(starty + i as i32, startx + j as i32, "#");
+                    attroff(A_DIM());
                 }
                 Cell::BOX(i, j) => {
                     mvprintw(starty + i as i32, startx + j as i32, "o");
                 }
                 Cell::TARGET(i, j) => {
+                    attron(A_DIM());
                     mvprintw(starty + i as i32, startx + j as i32, "x");
+                    attroff(A_DIM());
                 }
                 Cell::EMPTY(i, j) => {
                     mvprintw(starty + i as i32, startx + j as i32, " ");
@@ -47,21 +51,26 @@ fn paint(level: &Level) {
                     mvprintw(starty + i as i32, startx + j as i32, "I");
                 }
                 Cell::BOX_ON_TARGET(i, j) => {
+                    attron(A_BOLD() | A_BLINK());
                     mvprintw(starty + i as i32, startx + j as i32, "O");
+                    attroff(A_BOLD() | A_BLINK());
                 }
             };
         }
     }
+    let mut s = "Level ".to_string();
+    s.push_str(&level.index.to_string());
+    mvprintw(1, (COLS() - 8) / 2 as i32, &s);
     refresh();
 }
 
-fn next(i: usize) -> Level {
+fn next(i: usize) -> (usize, Level) {
     let level_count = map::Maps.len();
-    let mut index = i;
-    if i >= level_count {
+    let mut index = i + 1;
+    if index >= level_count {
         index = 0;
     }
-    Level::new(index + 1, Box::new(map::Maps[index]))
+    (index, Level::new(index + 1, Box::new(map::Maps[index])))
 }
 
 
@@ -69,13 +78,14 @@ fn main() {
     initscr();
     game_mode();
     let mut index: usize = 0;
-    let mut level = next(index);
+    let mut level = Level::new(1, Box::new(map::Maps[0]));
     level.reset();
     paint(&level);
     loop {
         if level.is_pass() {
-            index += 1;
-            level = next(index);
+            let t = next(index);
+            index = t.0;
+            level = t.1;
             level.reset();
             paint(&level);
         }
@@ -108,8 +118,9 @@ fn main() {
                 match &*input {
                     "q" => break,
                     "n" => {
-                        index += 1;
-                        level = next(index);
+                        let t = next(index);
+                        index = t.0;
+                        level = t.1;
                         level.reset();
                         paint(&level);
                     }
