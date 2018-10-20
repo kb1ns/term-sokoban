@@ -1,4 +1,4 @@
-pub const Maps: [[&'static str; 10]; 2] = [
+pub const MAPS: [[&'static str; 10]; 2] = [
     ["          ",
      "   ###    ",
      "   #x#    ",

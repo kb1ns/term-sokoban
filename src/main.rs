@@ -28,32 +28,33 @@ fn paint(level: &Level) {
     for l in level.map.as_slice() {
         for c in l {
             match *c {
-                Cell::PLAYER(i, j) => {
-                    mvprintw(starty + i as i32, startx + j as i32, "i");
+                Cell::Player(i, j) => {
+                    mvaddch(starty + i as i32, startx + j as i32, 'i' as u32);
                 }
-                Cell::WALL(i, j) => {
+                Cell::Wall(i, j) => {
                     attron(A_DIM());
-                    mvprintw(starty + i as i32, startx + j as i32, "#");
+                    mvaddch(starty + i as i32, startx + j as i32, ACS_CKBOARD());
                     attroff(A_DIM());
                 }
-                Cell::BOX(i, j) => {
-                    mvprintw(starty + i as i32, startx + j as i32, "o");
+                Cell::Box(i, j) => {
+                    mvaddch(starty + i as i32, startx + j as i32, 'o' as u32);
                 }
-                Cell::TARGET(i, j) => {
+                Cell::Target(i, j) => {
                     attron(A_DIM());
-                    mvprintw(starty + i as i32, startx + j as i32, "x");
+                    mvaddch(starty + i as i32, startx + j as i32, 'x' as u32);
                     attroff(A_DIM());
                 }
-                Cell::EMPTY(i, j) => {
-                    mvprintw(starty + i as i32, startx + j as i32, " ");
+                Cell::Empty(i, j) => {
+                    mvaddch(starty + i as i32, startx + j as i32, ' ' as u32);
                 }
-                Cell::PLAYER_ON_TARGET(i, j) => {
-                    mvprintw(starty + i as i32, startx + j as i32, "I");
+                Cell::PlayerOnTarget(i, j) => {
+                    mvaddch(starty + i as i32, startx + j as i32, 'I' as u32);
                 }
-                Cell::BOX_ON_TARGET(i, j) => {
-                    attron(A_BOLD() | A_BLINK());
-                    mvprintw(starty + i as i32, startx + j as i32, "O");
-                    attroff(A_BOLD() | A_BLINK());
+                Cell::BoxOnTarget(i, j) => {
+                    color_set(COLOR_RED);
+                    attron(A_BOLD() | A_BLINK() | COLOR_PAIR(COLOR_RED));
+                    mvaddch(starty + i as i32, startx + j as i32, 'O' as u32);
+                    attroff(A_BOLD() | A_BLINK() | COLOR_PAIR(COLOR_RED));
                 }
             };
         }
@@ -65,12 +66,12 @@ fn paint(level: &Level) {
 }
 
 fn next(i: usize) -> (usize, Level) {
-    let level_count = map::Maps.len();
+    let level_count = map::MAPS.len();
     let mut index = i + 1;
     if index >= level_count {
         index = 0;
     }
-    (index, Level::new(index + 1, Box::new(map::Maps[index])))
+    (index, Level::new(index + 1, Box::new(map::MAPS[index])))
 }
 
 
@@ -78,7 +79,7 @@ fn main() {
     initscr();
     game_mode();
     let mut index: usize = 0;
-    let mut level = Level::new(1, Box::new(map::Maps[0]));
+    let mut level = Level::new(1, Box::new(map::MAPS[0]));
     level.reset();
     paint(&level);
     loop {

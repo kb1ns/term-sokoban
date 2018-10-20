@@ -1,14 +1,13 @@
-use std::collections::HashMap;
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum Cell {
-    PLAYER(usize, usize),
-    WALL(usize, usize),
-    BOX(usize, usize),
-    EMPTY(usize, usize),
-    TARGET(usize, usize),
-    PLAYER_ON_TARGET(usize, usize),
-    BOX_ON_TARGET(usize, usize),
+    Player(usize, usize),
+    Wall(usize, usize),
+    Box(usize, usize),
+    Empty(usize, usize),
+    Target(usize, usize),
+    PlayerOnTarget(usize, usize),
+    BoxOnTarget(usize, usize),
 }
 
 pub struct Level {
@@ -25,58 +24,58 @@ pub struct Level {
 impl Cell {
     fn volume(&self) -> u32 {
         match *self {
-            Cell::BOX_ON_TARGET(_, _) => 1,
-            Cell::BOX(_, _) => 1,
-            Cell::WALL(_, _) => 1,
-            Cell::PLAYER_ON_TARGET(_, _) => 0,
-            Cell::PLAYER(_, _) => 0,
-            Cell::EMPTY(_, _) => 0,
-            Cell::TARGET(_, _) => 0,
+            Cell::BoxOnTarget(_, _) => 1,
+            Cell::Box(_, _) => 1,
+            Cell::Wall(_, _) => 1,
+            Cell::PlayerOnTarget(_, _) => 0,
+            Cell::Player(_, _) => 0,
+            Cell::Empty(_, _) => 0,
+            Cell::Target(_, _) => 0,
         }
     }
 
     fn mv(from: &Cell, push: &Cell, to: &Cell) -> (Cell, Cell, Cell, bool) {
         match *from {
-            Cell::PLAYER_ON_TARGET(pl, pc) => {
+            Cell::PlayerOnTarget(pl, pc) => {
                 match *push {
-                    Cell::WALL(wl, wc) => {
-                        (Cell::PLAYER_ON_TARGET(pl, pc), Cell::WALL(wl, wc), to.clone(), false)
+                    Cell::Wall(wl, wc) => {
+                        (Cell::PlayerOnTarget(pl, pc), Cell::Wall(wl, wc), to.clone(), false)
                     }
-                    Cell::EMPTY(el, ec) => {
-                        (Cell::TARGET(pl, pc), Cell::PLAYER(el, ec), to.clone(), true)
+                    Cell::Empty(el, ec) => {
+                        (Cell::Target(pl, pc), Cell::Player(el, ec), to.clone(), true)
                     }
-                    Cell::TARGET(tl, tc) => {
-                        (Cell::TARGET(pl, pc), Cell::PLAYER_ON_TARGET(tl, tc), to.clone(), true)
+                    Cell::Target(tl, tc) => {
+                        (Cell::Target(pl, pc), Cell::PlayerOnTarget(tl, tc), to.clone(), true)
                     }
-                    Cell::BOX(bl, bc) => {
+                    Cell::Box(bl, bc) => {
                         match *to {
-                            Cell::EMPTY(el, ec) => {
-                                (Cell::TARGET(pl, pc),
-                                 Cell::PLAYER(bl, bc),
-                                 Cell::BOX(el, ec),
+                            Cell::Empty(el, ec) => {
+                                (Cell::Target(pl, pc),
+                                 Cell::Player(bl, bc),
+                                 Cell::Box(el, ec),
                                  true)
                             }
-                            Cell::TARGET(tl, tc) => {
-                                (Cell::TARGET(pl, pc),
-                                 Cell::PLAYER(bl, bc),
-                                 Cell::BOX_ON_TARGET(tl, tc),
+                            Cell::Target(tl, tc) => {
+                                (Cell::Target(pl, pc),
+                                 Cell::Player(bl, bc),
+                                 Cell::BoxOnTarget(tl, tc),
                                  true)
                             }
                             _ => (from.clone(), push.clone(), to.clone(), false),
                         }
                     }
-                    Cell::BOX_ON_TARGET(bl, bc) => {
+                    Cell::BoxOnTarget(bl, bc) => {
                         match *to {
-                            Cell::EMPTY(el, ec) => {
-                                (Cell::TARGET(pl, pc),
-                                 Cell::PLAYER_ON_TARGET(bl, bc),
-                                 Cell::BOX(el, ec),
+                            Cell::Empty(el, ec) => {
+                                (Cell::Target(pl, pc),
+                                 Cell::PlayerOnTarget(bl, bc),
+                                 Cell::Box(el, ec),
                                  true)
                             }
-                            Cell::TARGET(tl, tc) => {
-                                (Cell::TARGET(pl, pc),
-                                 Cell::PLAYER_ON_TARGET(bl, bc),
-                                 Cell::BOX_ON_TARGET(tl, tc),
+                            Cell::Target(tl, tc) => {
+                                (Cell::Target(pl, pc),
+                                 Cell::PlayerOnTarget(bl, bc),
+                                 Cell::BoxOnTarget(tl, tc),
                                  true)
                             }
                             _ => (from.clone(), push.clone(), to.clone(), false),
@@ -85,41 +84,41 @@ impl Cell {
                     _ => (from.clone(), push.clone(), to.clone(), false),
                 }
             }
-            Cell::PLAYER(pl, pc) => {
+            Cell::Player(pl, pc) => {
                 match *push {
-                    Cell::WALL(_, _) => (from.clone(), push.clone(), to.clone(), false),
-                    Cell::EMPTY(el, ec) => {
-                        (Cell::EMPTY(pl, pc), Cell::PLAYER(el, ec), to.clone(), true)
+                    Cell::Wall(_, _) => (from.clone(), push.clone(), to.clone(), false),
+                    Cell::Empty(el, ec) => {
+                        (Cell::Empty(pl, pc), Cell::Player(el, ec), to.clone(), true)
                     }
-                    Cell::TARGET(tl, tc) => {
-                        (Cell::EMPTY(pl, pc), Cell::PLAYER_ON_TARGET(tl, tc), to.clone(), true)
+                    Cell::Target(tl, tc) => {
+                        (Cell::Empty(pl, pc), Cell::PlayerOnTarget(tl, tc), to.clone(), true)
                     }
-                    Cell::BOX(bl, bc) => {
+                    Cell::Box(bl, bc) => {
                         match *to {
-                            Cell::EMPTY(el, ec) => {
-                                (Cell::EMPTY(pl, pc), Cell::PLAYER(bl, bc), Cell::BOX(el, ec), true)
+                            Cell::Empty(el, ec) => {
+                                (Cell::Empty(pl, pc), Cell::Player(bl, bc), Cell::Box(el, ec), true)
                             }
-                            Cell::TARGET(tl, tc) => {
-                                (Cell::EMPTY(pl, pc),
-                                 Cell::PLAYER(bl, bc),
-                                 Cell::BOX_ON_TARGET(tl, tc),
+                            Cell::Target(tl, tc) => {
+                                (Cell::Empty(pl, pc),
+                                 Cell::Player(bl, bc),
+                                 Cell::BoxOnTarget(tl, tc),
                                  true)
                             }
                             _ => (from.clone(), push.clone(), to.clone(), false),
                         }
                     }
-                    Cell::BOX_ON_TARGET(bl, bc) => {
+                    Cell::BoxOnTarget(bl, bc) => {
                         match *to {
-                            Cell::EMPTY(el, ec) => {
-                                (Cell::EMPTY(pl, pc),
-                                 Cell::PLAYER_ON_TARGET(bl, bc),
-                                 Cell::BOX(el, ec),
+                            Cell::Empty(el, ec) => {
+                                (Cell::Empty(pl, pc),
+                                 Cell::PlayerOnTarget(bl, bc),
+                                 Cell::Box(el, ec),
                                  true)
                             }
-                            Cell::TARGET(tl, tc) => {
-                                (Cell::EMPTY(pl, pc),
-                                 Cell::PLAYER_ON_TARGET(bl, bc),
-                                 Cell::BOX_ON_TARGET(tl, tc),
+                            Cell::Target(tl, tc) => {
+                                (Cell::Empty(pl, pc),
+                                 Cell::PlayerOnTarget(bl, bc),
+                                 Cell::BoxOnTarget(tl, tc),
                                  true)
                             }
                             _ => (from.clone(), push.clone(), to.clone(), false),
@@ -152,7 +151,7 @@ impl Level {
         for l in self.map.as_slice() {
             for c in l {
                 match c {
-                    &Cell::BOX(_, _) => return false,
+                    &Cell::Box(_, _) => return false,
                     _ => {}
                 }
             }
@@ -180,7 +179,7 @@ impl Level {
 
     fn build_map(cellstr: &Box<[&str]>) -> (usize, usize, Vec<Vec<Cell>>, (usize, usize)) {
         let mut m: Vec<Vec<Cell>> = Vec::new();
-        let mut h: usize = cellstr.as_ref().len();
+        let h: usize = cellstr.as_ref().len();
         let mut w: usize = 0;
         let mut p: (usize, usize) = (0, 0);
         for (l, line) in cellstr.as_ref().iter().enumerate() {
@@ -189,27 +188,27 @@ impl Level {
             for (c, col) in line.chars().enumerate() {
                 match col {
                     ' ' => {
-                        mm.push(Cell::EMPTY(l, c));
+                        mm.push(Cell::Empty(l, c));
                     }
                     '#' => {
-                        mm.push(Cell::WALL(l, c));
+                        mm.push(Cell::Wall(l, c));
                     }
                     'o' => {
-                        mm.push(Cell::BOX(l, c));
+                        mm.push(Cell::Box(l, c));
                     }
                     'x' => {
-                        mm.push(Cell::TARGET(l, c));
+                        mm.push(Cell::Target(l, c));
                     }
                     'i' => {
-                        mm.push(Cell::PLAYER(l, c));
+                        mm.push(Cell::Player(l, c));
                         p = (l, c);
                     }
                     'I' => {
-                        mm.push(Cell::PLAYER_ON_TARGET(l, c));
+                        mm.push(Cell::PlayerOnTarget(l, c));
                         p = (l, c);
                     }
                     'O' => {
-                        mm.push(Cell::BOX_ON_TARGET(l, c));
+                        mm.push(Cell::BoxOnTarget(l, c));
                     }
                     _ => {
                         panic!("Err: Illegal char in map.");

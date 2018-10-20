@@ -5,3 +5,7 @@ authors = ["Arthur Archer <archerfeel@gmail.com>"]
 
 [dependencies]
 "ncurses" = "5.85.0"
+
+[[bin]]
+path = "src/main.rs"
+name = "sokoban"
