@@ -92,10 +92,25 @@ pub type Map = Vec<Vec<Cell>>;
 
 pub type Coordinate = (usize, usize);
 
+pub fn update(map: &mut Map, triple: &(Coordinate, Coordinate, Coordinate)) -> (Triple, bool) {
+    let origin = (
+        map[(triple.0).0][(triple.0).1].clone(),
+        map[(triple.1).0][(triple.1).1].clone(),
+        map[(triple.2).0][(triple.2).1].clone(),
+    );
+    let (transform, moved) = Cell::shift(&origin);
+    if moved {
+        map[(triple.0).0][(triple.0).1] = transform.0;
+        map[(triple.1).0][(triple.1).1] = transform.1;
+        map[(triple.2).0][(triple.2).1] = transform.2;
+    }
+    (origin, moved)
+}
+
 pub struct Scene {
     pub player: Coordinate,
     pub map: Map,
-    history: Vec<((Coordinate, Coordinate, Coordinate), Triple)>,
+    history: Vec<(Coordinate, Coordinate, Coordinate, Triple)>,
 }
 
 impl Scene {
@@ -150,46 +165,45 @@ impl Scene {
         vec![]
     }
 
-    pub fn update(&mut self, triple: &(Coordinate, Coordinate, Coordinate)) -> bool {
-        let origin = (
-            self.map[(triple.0).0][(triple.0).1].clone(),
-            self.map[(triple.1).0][(triple.1).1].clone(),
-            self.map[(triple.2).0][(triple.2).1].clone(),
-        );
-        let (transform, moved) = Cell::shift(&origin);
-        if moved {
-            self.map[(triple.0).0][(triple.0).1] = transform.0;
-            self.map[(triple.1).0][(triple.1).1] = transform.1;
-            self.map[(triple.2).0][(triple.2).1] = transform.2;
-            self.player = triple.1.clone();
-            self.history.push((triple.clone(), origin));
+    pub fn move_right(&mut self) {
+        let (r, c) = (self.player.0, self.player.1);
+        let (origin, updated) = update(&mut self.map, &((r, c), (r, c + 1), (r, c + 2)));
+        if updated {
+            self.player = (r, c + 1);
+            self.history.push(((r, c), (r, c + 1), (r, c + 2), origin));
         }
-        moved
     }
 
-    pub fn move_right(&mut self) -> bool {
+    pub fn move_left(&mut self) {
         let (r, c) = (self.player.0, self.player.1);
-        self.update(&((r, c), (r, c + 1), (r, c + 2)))
+        let (origin, updated) = update(&mut self.map, &((r, c), (r, c - 1), (r, c - 2)));
+        if updated {
+            self.player = (r, c - 1);
+            self.history.push(((r, c), (r, c - 1), (r, c - 2), origin));
+        }
     }
 
-    pub fn move_left(&mut self) -> bool {
+    pub fn move_upward(&mut self) {
         let (r, c) = (self.player.0, self.player.1);
-        self.update(&((r, c), (r, c - 1), (r, c - 2)))
+        let (origin, updated) = update(&mut self.map, &((r, c), (r - 1, c), (r - 2, c)));
+        if updated {
+            self.player = (r - 1, c);
+            self.history.push(((r, c), (r - 1, c), (r - 2, c), origin));
+        }
     }
 
-    pub fn move_upward(&mut self) -> bool {
+    pub fn move_down(&mut self) {
         let (r, c) = (self.player.0, self.player.1);
-        self.update(&((r, c), (r - 1, c), (r - 2, c)))
-    }
-
-    pub fn move_down(&mut self) -> bool {
-        let (r, c) = (self.player.0, self.player.1);
-        self.update(&((r, c), (r + 1, c), (r + 2, c)))
+        let (origin, updated) = update(&mut self.map, &((r, c), (r + 1, c), (r + 2, c)));
+        if updated {
+            self.player = (r + 1, c);
+            self.history.push(((r, c), (r + 1, c), (r + 2, c), origin));
+        }
     }
 
     pub fn undo(&mut self) {
         match self.history.pop() {
-            Some(((f, p, t), triple)) => {
+            Some((f, p, t, triple)) => {
                 self.map[f.0][f.1] = triple.0;
                 self.map[p.0][p.1] = triple.1;
                 self.map[t.0][t.1] = triple.2;

@@ -23,10 +23,10 @@ fn ctl_mode() {
     echo();
 }
 
-fn paint(level: usize, scene: &Scene) {
-    let starty = (LINES() - scene.get_size().0 as i32) / 2;
-    let startx = (COLS() - scene.get_size().1 as i32) / 2;
-    for (i, row) in scene.map.iter().enumerate() {
+fn paint(level: usize, map: &Map) {
+    let starty = (LINES() - map.len() as i32) / 2;
+    let startx = (COLS() - map[0].len() as i32) / 2;
+    for (i, row) in map.iter().enumerate() {
         for (j, column) in row.iter().enumerate() {
             match column {
                 &Cell::Player => {
@@ -65,63 +65,68 @@ fn paint(level: usize, scene: &Scene) {
     refresh();
 }
 
-
 fn main() {
     initscr();
     game_mode();
     let mut level = 0;
     let mut scene = Scene::init();
     scene.load(&map::MAPS[level % map::MAPS.len()]);
-    paint(level, &scene);
+    paint(level, &scene.map);
     loop {
         if scene.is_pass() {
             level = level + 1;
             scene.load(&map::MAPS[level % map::MAPS.len()]);
-            paint(level, &scene);
+            paint(level, &scene.map);
         }
         let ch = getch();
         match ch {
             KEY_LEFT | 0x68 => {
                 scene.move_left();
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             KEY_RIGHT | 0x6c => {
                 scene.move_right();
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             KEY_UP | 0x6b => {
                 scene.move_upward();
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             KEY_DOWN | 0x6a => {
                 scene.move_down();
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             // u
             0x75 => {
                 clear();
                 scene.undo();
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             // r
             0x72 => {
                 clear();
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             // n
             0x6e => {
                 clear();
                 level = level + 1;
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
-                paint(level, &scene);
+                paint(level, &scene.map);
             }
             // v
             0x76 => {
                 clear();
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
-                paint(level, &scene);
-                resolve(&scene.map, &scene.player);
+                paint(level, &scene.map);
+                // resolve(&scene.map, &scene.player);
+                // debug
+                let branches: Vec<(Map, Coordinate)> = get_branches(&scene.map, &scene.player);
+                for b in branches {
+                    paint(level, &b.0);
+                    getch();
+                }
             }
             // q
             0x71 => break,

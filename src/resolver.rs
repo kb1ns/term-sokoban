@@ -8,29 +8,37 @@ struct Snapshot {
 }
 
 pub fn resolve(map: &Map, coordinate: &Coordinate) {
-    let searched: HashSet<Snapshot> = HashSet::new();
-    let path = Vec::<Snapshot>::new();
-    explore_player_area(map, coordinate);
+    let mut searched: HashSet<Snapshot> = HashSet::new();
+    let mut path = Vec::<Snapshot>::new();
 }
 
-fn candidates(map: &Map, player_area: &HashSet<Coordinate>) -> Vec<Map> {
+pub fn get_branches(map: &Map, player: &Coordinate) -> Vec<(Map, Coordinate)> {
+    let player_area = explore_player_area(map, player);
+    let mut candidates = vec![];
     for coordinate in player_area {
         for (mi, mj, li, lj) in &[(1, 0, 2, 0), (-1, 0, -2, 0), (0, 1, 0, 2), (0, -1, 0, -2)] {
-            // let x = ((head.0 as i32 + mi) as usize, (head.1 as i32 + mj) as usize);
-            // let y = ((head.0 as i32 + li) as usize, (head.1 as i32 + lj) as usize);
-            // let mut candidate = map.clone();
-            // let origin = (
-            //     self.candidate[head.0][head.1].clone(),
-            //     self.candidate[x.0][x.1].clone(),
-            //     self.candidate[y.0][y.1].clone(),
-            // );
-            // let (t, moved) = Cell::shift(&origin);
-            // if moved {
-            //     candidate.
-            // }
+            let x = (
+                (coordinate.0 as i32 + mi) as usize,
+                (coordinate.1 as i32 + mj) as usize,
+            );
+            let y = (
+                (coordinate.0 as i32 + li) as usize,
+                (coordinate.1 as i32 + lj) as usize,
+            );
+            let mut candidate = map.clone();
+            let toggle = match &candidate[player.0][player.1] {
+                &Cell::Player => Cell::Ground,
+                &Cell::PlayerOnTarget => Cell::Target,
+                _ => panic!("won't happend"),
+            };
+            candidate[player.0][player.1] = toggle;
+            let (_, v) = update(&mut candidate, &(coordinate.clone(), x.clone(), y));
+            if v {
+                candidates.push((candidate, x));
+            }
         }
     }
-    vec![]
+    candidates
 }
 
 fn test(map: &Map) -> bool {
