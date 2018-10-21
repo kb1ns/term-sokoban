@@ -1,6 +1,8 @@
 # rust-sokoban
+
 --
-![](sokoban.gif)
+
+![](sokoban.png)
 
 - q -- quit
 - r -- restart
