@@ -116,6 +116,13 @@ fn main() {
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
                 paint(level, &scene);
             }
+            // v
+            0x76 => {
+                clear();
+                scene.load(&map::MAPS[level % map::MAPS.len()]);
+                paint(level, &scene);
+                resolve(&scene.map, &scene.player);
+            }
             // q
             0x71 => break,
             _ => {}
