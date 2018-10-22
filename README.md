@@ -1,6 +1,5 @@
 # rust-sokoban
 
---
 
 ![](sokoban.png)
 
@@ -12,3 +11,4 @@
 - k -- up
 - h -- left
 - l -- right
+- e -- explore mode (visualized solver)

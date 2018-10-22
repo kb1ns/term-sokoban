@@ -45,6 +45,14 @@ impl Cell {
         }
     }
 
+    pub fn is_case(&self) -> bool {
+        match self {
+            &Cell::Case => true,
+            &Cell::CaseOnTarget => true,
+            _ => false,
+        }
+    }
+
     fn overlay(&self, unit: &Self) -> Self {
         match self {
             &Cell::Ground => match unit {
@@ -107,6 +115,13 @@ pub fn update(map: &mut Map, triple: &(Coordinate, Coordinate, Coordinate)) -> (
     (origin, moved)
 }
 
+pub fn is_pass(map: &Map) -> bool {
+    map.iter()
+        .map(|ref r| r.iter().filter(|x| **x == Cell::Case).count())
+        .fold(0, |sum, val| sum + val)
+        == 0
+}
+
 pub struct Scene {
     pub player: Coordinate,
     pub map: Map,
@@ -154,11 +169,7 @@ impl Scene {
     }
 
     pub fn is_pass(&self) -> bool {
-        self.map
-            .iter()
-            .map(|ref r| r.iter().filter(|x| **x == Cell::Case).count())
-            .fold(0, |sum, val| sum + val)
-            == 0
+        is_pass(&self.map)
     }
 
     pub fn get_boxes(&self) -> Vec<Coordinate> {

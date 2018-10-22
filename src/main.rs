@@ -2,11 +2,11 @@ extern crate ncurses;
 
 mod engine;
 mod map;
-mod resolver;
+mod solver;
 
 use engine::*;
 use ncurses::*;
-use resolver::*;
+use solver::*;
 
 fn game_mode() {
     raw();
@@ -75,6 +75,7 @@ fn main() {
     loop {
         if scene.is_pass() {
             level = level + 1;
+            clear();
             scene.load(&map::MAPS[level % map::MAPS.len()]);
             paint(level, &scene.map);
         }
@@ -96,39 +97,36 @@ fn main() {
                 scene.move_down();
                 paint(level, &scene.map);
             }
-            // u
+            // undo
             0x75 => {
                 clear();
                 scene.undo();
                 paint(level, &scene.map);
             }
-            // r
+            // restart
             0x72 => {
                 clear();
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
                 paint(level, &scene.map);
             }
-            // n
+            // next
             0x6e => {
                 clear();
                 level = level + 1;
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
                 paint(level, &scene.map);
             }
-            // v
-            0x76 => {
+            // explore
+            0x65 => {
                 clear();
                 scene.load(&map::MAPS[level % map::MAPS.len()]);
                 paint(level, &scene.map);
-                // resolve(&scene.map, &scene.player);
-                // debug
-                let branches: Vec<(Map, Coordinate)> = get_branches(&scene.map, &scene.player);
-                for b in branches {
-                    paint(level, &b.0);
-                    getch();
-                }
+                solve(&scene.map, &scene.player);
+                clear();
+                scene.load(&map::MAPS[level % map::MAPS.len()]);
+                paint(level, &scene.map);
             }
-            // q
+            // quit
             0x71 => break,
             _ => {}
         }
